@@ -41,19 +41,88 @@ Tot <- sqldf("select sum(steps) from df3 group by date ")
 
 ```r
 colnames(Tot) <- "steps"
+```
+#### 1. Total number of steps taken per day
 
+```r
+print(Tot)
+```
+
+```
+##    steps
+## 1    126
+## 2  11352
+## 3  12116
+## 4  13294
+## 5  15420
+## 6  11015
+## 7  12811
+## 8   9900
+## 9  10304
+## 10 17382
+## 11 12426
+## 12 15098
+## 13 10139
+## 14 15084
+## 15 13452
+## 16 10056
+## 17 11829
+## 18 10395
+## 19  8821
+## 20 13460
+## 21  8918
+## 22  8355
+## 23  2492
+## 24  6778
+## 25 10119
+## 26 11458
+## 27  5018
+## 28  9819
+## 29 15414
+## 30 10600
+## 31 10571
+## 32 10439
+## 33  8334
+## 34 12883
+## 35  3219
+## 36 12608
+## 37 10765
+## 38  7336
+## 39    41
+## 40  5441
+## 41 14339
+## 42 15110
+## 43  8841
+## 44  4472
+## 45 12787
+## 46 20427
+## 47 21194
+## 48 14478
+## 49 11834
+## 50 11162
+## 51 13646
+## 52 10183
+## 53  7047
+```
+
+#### 2. Histogram of total number of steps taken
+
+```r
 par(mfrow = c(1,1))
 
 hist(Tot$steps , breaks = 25, ylim = c(0,10), col = 'brown', xlab = 'Sum of Steps', bg = 'white', main = 'Number of Steps per day')
 ```
 
-![](PA1_template_files/figure-html/1.Histogram-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 
 ```r
 MMPDay <- sqldf("select date as Date, AVG(steps) as Mean, ((max(steps) + min(steps)) / 2)  as Median from df3 group by date ")
+```
 
+#### 3.Mean and Median of the total number of steps taken.
 
+```r
 print(MMPDay)
 ```
 
@@ -116,18 +185,24 @@ print(MMPDay)
 
 ## What is the average daily activity pattern?
 
-
+```r
 library(lattice)
 
 AveStepsInt <- sqldf("select interval, AVG(steps) as Mean from df3 group by interval ")
- 
+```
+#### 1. Time series plot of 5 min interval and average steps taken.
+
+```r
 xyplot(AveStepsInt$Mean ~ AveStepsInt$interval,
-        data = MMPDay,
+        data = AveStepsInt,
         type = "l", lty = c(1, 2, 2, 1),
         xlab = "Interval", ylab = "Average Steps"
        )
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+####2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 
 ```r
@@ -144,7 +219,6 @@ print(maxInt)
 ## Imputing missing values
 ### Strategy is to to fill with mean of interval for NA's while counting them and create a new dataset with missing values filled in (this covers 2 & 3 of the instruction for assignment)
 
-
 ```r
 TotalNas <- 0
 
@@ -159,7 +233,7 @@ for(i in 1:17568) {
 
 colnames(df2) <- c("steps", "date", "interval")
 ```
-###1. Total Number of NA values
+#### 1. Total Number of NA values
 
 ```r
 print(TotalNas)
@@ -277,6 +351,8 @@ df2$wDay <-  factor((df2$day %in% weekdays1)+1L,
 
 ## Making a time series panel plot for weekdays versus weekends
 
+#### 1. Creating a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
 
 ```r
 library(lattice)
@@ -295,8 +371,12 @@ AveStepsInt3 <- sqldf("select interval,
 
 
 df4 <- rbind(AveStepsInt3, AveStepsInt2)
+```
+
+#### 2. Panel Plot 5 min interval and average number of steps of taken.
 
 
+```r
 xyplot(Mean ~ interval | wDay, 
         data = df4,
         layout=c(1,2),
@@ -305,5 +385,5 @@ xyplot(Mean ~ interval | wDay,
        )
 ```
 
-![](PA1_template_files/figure-html/time series panel plot-1.png) 
+![](PA1_template_files/figure-html/Panel Plot-1.png) 
 
