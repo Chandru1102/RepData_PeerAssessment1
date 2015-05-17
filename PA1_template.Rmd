@@ -8,18 +8,166 @@ output:
 
 ## Loading and preprocessing the data
 
+```{r}
 
+#unzip the file
+file <- unzip("activity.zip")
+#read the file
+df1 <- read.csv(file, header = TRUE, sep = ",", na.strings = "NA", nrows = 17568)
+
+#assingn  to another data frame so we can use for later analysis 
+df2 <- df1
+
+#geta clean dataframe without NAs
+df3 <- na.omit(df1)
+
+
+```
 
 ## What is mean total number of steps taken per day?
 
+```{r 1.Histogram }
+library(sqldf)
+Tot <- sqldf("select sum(steps) from df3 group by date ")
+colnames(Tot) <- "steps"
 
+par(mfrow = c(1,1))
+
+hist(Tot$steps , breaks = 25, ylim = c(0,10), col = 'brown', xlab = 'Sum of Steps', bg = 'white', main = 'Number of Steps per day')
+
+
+```
+
+```{r 2.Mean and Median}
+MMPDay <- sqldf("select date as Date, AVG(steps) as Mean, ((max(steps) + min(steps)) / 2)  as Median from df3 group by date ")
+
+
+print(MMPDay)
+
+```
 
 ## What is the average daily activity pattern?
+```{r Average Daily Activity Pattern}
+```
 
+library(lattice)
 
+AveStepsInt <- sqldf("select interval, AVG(steps) as Mean from df3 group by interval ")
+ 
+xyplot(AveStepsInt$Mean ~ AveStepsInt$interval,
+        data = MMPDay,
+        type = "l", lty = c(1, 2, 2, 1),
+        xlab = "Interval", ylab = "Average Steps"
+       )
+
+```
+
+```{r Interval at Maximum number of steps}
+
+maxInt <- sqldf(" select interval from df3 where steps = (select MAX(steps) from df3)")
+
+print(maxInt)
+
+```
 
 ## Imputing missing values
+### Strategy is to to fill with mean of interval for NA's while counting them and create a new dataset with missing values filled in (this covers 2 & 3 of the instruction for assignment)
+
+```{r Impute}
+
+TotalNas <- 0
+
+for(i in 1:17568) {
+        if (is.na(df1$steps[i])) {  
+            m =df1$interval[i]
+            df2$steps[i] <- as.integer(sqldf(paste("select Mean from AveStepsInt where interval = " ,m)))
+            TotalNas <- TotalNas + 1
+            
+        }
+}
+
+colnames(df2) <- c("steps", "date", "interval")
+
+```
+###1. Total Number of NA values
+```{r}
+print(TotalNas)
+
+```
+### 4. Histogram after Imputing
+```{r 2.Histogram }
+
+Tot2 <- sqldf("select sum(steps) from df2 group by date ")
+colnames(Tot2) <- "steps"
+
+par(mfrow = c(1,1))
+
+hist(Tot2$steps , breaks = 25,, ylim = c(0,10), col = 'brown', xlab = 'Sum of Steps', bg = 'white', main = 'Number of Steps per day')
+
+
+```
+
+### 4. Mean and Median after imputing
+```{r Mean and Median}
+MMPDay2 <- sqldf("select date as Date, AVG(steps) as Mean, ((max(steps) + min(steps)) / 2)  as Median from df2 group by date ")
+
+MMPDay2$Median <- as.integer(MMPDay2$Median)
+
+print(MMPDay2)
+
+
+
+```
+## Impact after imputing missing date
+
+#### Surprisingly the graph, mean and median hasnt changed at all
+#### well it make sense since we are filling in with mean value which shouldnt really affect the median/mean/graph. 
 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r Differences in activity patters between weekdays and weekends}
+
+#create a vector of weekdays
+df2$day <- weekdays(as.Date(df2$date))
+weekdays1 <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+#Use `%in%` and `weekdays` to create a logical vector
+#convert to `factor` and specify the `levels/labels`
+df2$wDay <-  factor((df2$day %in% weekdays1)+1L,
+      levels=1:2, labels=c('weekday', 'weekend'))
+
+```
+
+## Making a time series panel plot for weekdays versus weekends
+
+```{r time series panel plot}
+
+library(lattice)
+AveStepsInt2 <- sqldf("select interval,
+                      wDay,
+                      AVG(steps) as Mean 
+                      from df2 
+                      where wDay = 'weekday'
+                      group by interval ")
+AveStepsInt3 <- sqldf("select interval,
+                      wDay,
+                      AVG(steps) as Mean 
+                      from df2 
+                      where wDay = 'weekend'
+                      group by interval ")
+
+
+df4 <- rbind(AveStepsInt3, AveStepsInt2)
+
+
+xyplot(Mean ~ interval | wDay, 
+        data = df4,
+        layout=c(1,2),
+        type = "l", lty = c(1, 2, 2, 1),
+        xlab = "Interval", ylab = "Number of Steps"
+       )
+
+
+```
+
