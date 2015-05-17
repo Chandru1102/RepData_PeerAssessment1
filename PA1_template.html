@@ -228,11 +228,11 @@ AveStepsInt &lt;- sqldf(&quot;select interval, AVG(steps) as Mean from df3 group
 </div>
 <div id="which-5-minute-interval-on-average-across-all-the-days-in-the-dataset-contains-the-maximum-number-of-steps" class="section level4">
 <h4>2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?</h4>
-<pre class="r"><code>maxInt &lt;- sqldf(&quot; select interval from df3 where steps = (select MAX(steps) from df3)&quot;)
+<pre class="r"><code>maxInt &lt;- sqldf(&quot; select interval from AveStepsInt where Mean = (select MAX(Mean) from AveStepsInt)&quot;)
 
 print(maxInt)</code></pre>
 <pre><code>##   interval
-## 1      615</code></pre>
+## 1      835</code></pre>
 </div>
 </div>
 <div id="imputing-missing-values" class="section level2">
@@ -251,8 +251,8 @@ for(i in 1:17568) {
 }
 
 colnames(df2) &lt;- c(&quot;steps&quot;, &quot;date&quot;, &quot;interval&quot;)</code></pre>
-<div id="total-number-of-na-values" class="section level4">
-<h4>1. Total Number of NA values</h4>
+<div id="total-number-of-rows-for-steps-with-na-values" class="section level4">
+<h4>1. Total number of rows for steps with NA values</h4>
 <pre class="r"><code>print(TotalNas)</code></pre>
 <pre><code>## [1] 2304</code></pre>
 </div>
@@ -340,11 +340,11 @@ print(MMPDay2)</code></pre>
 </div>
 <div id="impact-after-imputing-missing-date" class="section level2">
 <h2>Impact after imputing missing date</h2>
-<div id="surprisingly-the-graph-mean-and-median-hasnt-changed-at-all" class="section level4">
-<h4>Surprisingly the graph, mean and median hasnt changed at all</h4>
+<div id="surprisingly-the-graph-mean-and-median-hasnt-changed-much-at-all" class="section level4">
+<h4>Surprisingly the graph, mean and median hasnt changed much at all</h4>
 </div>
-<div id="well-it-make-sense-since-we-are-filling-in-with-mean-value-which-shouldnt-really-affect-the-medianmeangraph." class="section level4">
-<h4>well it make sense since we are filling in with mean value which shouldnt really affect the median/mean/graph.</h4>
+<div id="well-it-make-sense-since-we-are-filling-in-with-mean-value-which-shouldnt-really-affect-the-medianmeangraph.-we-do-have-additional-rows-of-data-due-to-imputing." class="section level4">
+<h4>well it make sense since we are filling in with mean value which shouldnt really affect the median/mean/graph. We do have additional rows of data due to imputing.</h4>
 </div>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
@@ -378,8 +378,8 @@ AveStepsInt3 &lt;- sqldf(&quot;select interval,
 
 df4 &lt;- rbind(AveStepsInt3, AveStepsInt2)</code></pre>
 </div>
-<div id="panel-plot-5-min-interval-and-average-number-of-steps-of-taken." class="section level4">
-<h4>2. Panel Plot 5 min interval and average number of steps of taken.</h4>
+<div id="panel-plot-containing-time-series-for-5-min-interval-and-average-number-of-steps-of-taken." class="section level4">
+<h4>2. Panel Plot containing time series for 5 min interval and average number of steps of taken.</h4>
 <pre class="r"><code>xyplot(Mean ~ interval | wDay, 
         data = df4,
         layout=c(1,2),

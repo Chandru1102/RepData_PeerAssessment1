@@ -206,14 +206,14 @@ xyplot(AveStepsInt$Mean ~ AveStepsInt$interval,
 
 
 ```r
-maxInt <- sqldf(" select interval from df3 where steps = (select MAX(steps) from df3)")
+maxInt <- sqldf(" select interval from AveStepsInt where Mean = (select MAX(Mean) from AveStepsInt)")
 
 print(maxInt)
 ```
 
 ```
 ##   interval
-## 1      615
+## 1      835
 ```
 
 ## Imputing missing values
@@ -233,7 +233,7 @@ for(i in 1:17568) {
 
 colnames(df2) <- c("steps", "date", "interval")
 ```
-#### 1. Total Number of NA values
+#### 1. Total number of rows for steps with NA values
 
 ```r
 print(TotalNas)
@@ -331,8 +331,8 @@ print(MMPDay2)
 ```
 ## Impact after imputing missing date
 
-#### Surprisingly the graph, mean and median hasnt changed at all
-#### well it make sense since we are filling in with mean value which shouldnt really affect the median/mean/graph. 
+#### Surprisingly the graph, mean and median hasnt changed much at all
+#### well it make sense since we are filling in with mean value which shouldnt really affect the median/mean/graph. We do have additional rows of data due to imputing.
 
 
 
@@ -373,7 +373,7 @@ AveStepsInt3 <- sqldf("select interval,
 df4 <- rbind(AveStepsInt3, AveStepsInt2)
 ```
 
-#### 2. Panel Plot 5 min interval and average number of steps of taken.
+#### 2. Panel Plot containing time series for 5 min interval and average number of steps of taken.
 
 
 ```r
